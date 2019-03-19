@@ -1,3 +1,5 @@
+//Added to github
+
 // Configuration variables
 float animationSpeed = 20.0f;
 float         angleA = 0.0f;
