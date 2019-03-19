@@ -17,6 +17,10 @@ float[] aBx = new float[32400];
 float[] aBy = new float[32400];
 float[] aBdistance = new float[32400];
 int counter;
+int lowIndex;
+int pAngleA;
+int pAngleB;
+float pDistance;
 
 void setup() {
   size(640, 380);
@@ -29,7 +33,13 @@ void setup() {
 }
 
 void draw() {
+  calcDistance();
+  lowIndex = getLowestDistanceIndex();
+  pAngleA = lowIndex/180;
+  pAngleB = lowIndex%180;
+  pDistance = sqrt(aBdistance[lowIndex]);
   background(20);
+  
   
   // Draw Info Text
   drawText();
@@ -44,6 +54,8 @@ void draw() {
   
   // Draw Robot Arms
   drawRobotArms();
+  
+  drawPreview((float)pAngleA, (float)pAngleB);
   
   // Restore Matrix
   popMatrix();
@@ -75,6 +87,22 @@ void drawRobotArms(){
   line(Bx, By, Bx, By);
 }
 
+void drawPreview(float angleA, float angleB){
+  Ax = Ox + (MagA * cos(radians(angleA - offsetA)));
+  Ay = Oy + (MagA * sin(radians(angleA - offsetA)));
+  Bx = Ax + (MagA * cos(radians(angleA - offsetA - offsetB + angleB)));
+  By = Ay + (MagA * sin(radians(angleA - offsetA - offsetB + angleB)));
+  
+  //stroke(255);
+  //line(Ox, 0, Ox, Oy);
+  stroke(255,0,0,100);
+  line(Ox, Oy, Ax, Ay);
+  stroke(0,255,0,100);
+  line(Ax, Ay, Bx, By);
+  stroke(255);
+  line(Bx, By, Bx, By);
+}
+
 void drawText(){
   int textX = 10;
   int textY = 20;
@@ -98,15 +126,13 @@ void drawText(){
   text(" mouseY: " + (height - mouseY), textX, textY);
   textY += spacingY;
   
-  calcDistance();
-  int lowIndex = getLowestDistanceIndex();
-  text(" Distance: " + sqrt(aBdistance[lowIndex]), textX, textY);
+  text(" Distance: " + pDistance, textX, textY);
   textY += spacingY;
   text(" lowIndex: " + lowIndex, textX, textY);
   textY += spacingY;
-  text(" A: " + (lowIndex/180), textX, textY);
+  text(" A: " + (pAngleA), textX, textY);
   textY += spacingY;
-  text(" B: " + (lowIndex%180), textX, textY);
+  text(" B: " + (pAngleB), textX, textY);
 }
 
 void animateAngles(){
