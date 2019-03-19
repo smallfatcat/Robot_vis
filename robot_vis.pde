@@ -21,6 +21,7 @@ int lowIndex;
 int pAngleA;
 int pAngleB;
 float pDistance;
+int withinRange = 0;
 
 void setup() {
   size(640, 380);
@@ -133,6 +134,9 @@ void drawText(){
   text(" A: " + (pAngleA), textX, textY);
   textY += spacingY;
   text(" B: " + (pAngleB), textX, textY);
+  textY += spacingY;
+  text(" withinRange: " + (withinRange), textX, textY);
+  
 }
 
 void animateAngles(){
@@ -178,12 +182,16 @@ void calcDistance(){
 }
 
 int getLowestDistanceIndex(){
+  withinRange = 0;
   int lowestIndex=0;
   float lowestDistance = aBdistance[0];
   for(int i=1;i<32400;i++){
     if(aBdistance[i]<lowestDistance){
       lowestIndex = i;
       lowestDistance = aBdistance[i];
+    }
+    if(aBdistance[i]<0.25){
+      withinRange++;
     }
   }
   return lowestIndex;
