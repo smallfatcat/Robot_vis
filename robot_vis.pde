@@ -4,8 +4,8 @@
 float animationSpeed = 20.0f;
 float         angleA = 0.0f;
 float         angleB = 0.0f;
-float        offsetA = 0.0f;
-float        offsetB = 0.0f;
+float        offsetA = 45.0f;
+float        offsetB = 150.0f;
 float             Ox = 200.0f;
 float             Oy = 60.0f;
 float           MagA = 50.0f;
@@ -146,16 +146,16 @@ void animateAngles(){
     angleA +=animationSpeed;
     if(angleA>180){
       angleA = 0.0f;
-      offsetB+=animationSpeed;
-      if(offsetB>180){
-        offsetB = 0.0f;
-        offsetA+=animationSpeed;
-        if(offsetA>180){
-          offsetA = 0.0f;
-        }
-      }
-      // Offset changed, recalculate B position
-      calcB();
+      //offsetB+=animationSpeed;
+      //if(offsetB>180){
+      //  offsetB = 0.0f;
+      //  offsetA+=animationSpeed;
+      //  if(offsetA>180){
+      //    offsetA = 0.0f;
+      //  }
+      //}
+      //// Offset changed, recalculate B position
+      //calcB();
     }
   }
 }
