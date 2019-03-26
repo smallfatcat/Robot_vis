@@ -4,14 +4,6 @@ int lf = 10;    // Linefeed in ASCII
 String serialText = null;
 Serial myPort;  // The serial port
 PFont f;
-int setAngleA = 90;
-int setAngleB = 90;
-int setAngleC = 90;
-int setAngleD = 90;
-int setBoxAX = 300;
-int setBoxBX = 350;
-int setBoxCX = 400;
-int setBoxDX = 450;
 int mousePressedX = 0;
 int mousePressedY = 0;
 int mousePressedOn = 0;
@@ -67,10 +59,9 @@ void mouseReleased() {
 }
 
 void dragSetAngleBoxes(){
-  int offsetX, offsetY;
+  int offsetY;
   if(mousePressed && validDrag){
     int previousAngle = setAngles[mousePressedOn];
-    offsetX = mouseX - mousePressedX;
     offsetY = mouseY - mousePressedY;
     setAngles[mousePressedOn] = startAngle - (offsetY/2);
     if(setAngles[mousePressedOn]<0){
