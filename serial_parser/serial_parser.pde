@@ -69,6 +69,7 @@ void mouseReleased() {
 void dragSetAngleBoxes(){
   int offsetX, offsetY;
   if(mousePressed && validDrag){
+    int previousAngle = setAngles[mousePressedOn];
     offsetX = mouseX - mousePressedX;
     offsetY = mouseY - mousePressedY;
     setAngles[mousePressedOn] = startAngle - (offsetY/2);
@@ -78,10 +79,19 @@ void dragSetAngleBoxes(){
     if(setAngles[mousePressedOn]>180){
       setAngles[mousePressedOn] = 180;
     }
+    if(previousAngle != setAngles[mousePressedOn]){
+      String outputText = "S A" + setAngles[0] + ",B" + setAngles[1] + ",C" + setAngles[2] + ",D" + setAngles[3] + ",\n";
+      myPort.write(outputText);
+      print(outputText);
+    }
   }
 }
 
 void draw() {
+  if(frameCount%10 == 0){
+    myPort.write("R\n");
+    //println("Trigger");
+  }
   background(20);
   fill(200,200,200);
   text(" frameCounter: " + frameCounter, 20, 60);
@@ -92,7 +102,7 @@ void draw() {
   for(int i = 0; i < 4; i++){
     drawBox(str(setAngles[i]), setBoxesX[i]);
     overBox[i] = mouseInBox(setAngles[i], setBoxesX[i]);
-    text(" inBox" + labels[i] + " " + overBox[i], 20, 160+ (i*20));
+    //text(" inBox" + labels[i] + " " + overBox[i], 20, 160+ (i*20));
   }
   
   if (serialText != null) {
@@ -138,8 +148,10 @@ void drawBox(String angleBox, int boxX){
   int angleInt = int(angleBox);
   
   int boxY = boxSpan - (angleInt*2) + 200;
-  stroke(255);
   fill(0);
+  stroke(40);
+  rect(boxX, boxSpan - 160, boxWidth, 360 + boxHeight);
+  stroke(255);
   rect(boxX, boxY, boxWidth, boxHeight);
   fill(255);
   text(angleBox, boxX + 8, boxY + 20);
