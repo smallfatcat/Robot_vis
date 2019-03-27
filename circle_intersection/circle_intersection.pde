@@ -124,31 +124,9 @@ class Arm {
   }
 }
 
-int angle = 0;
-int direction = 1;
-LegalMove[] legalMoves = {};
-boolean firstRun = true;
-
-PFont f;
-
-void setup() {
-  f = createFont("Lucida Console", 14);
-  textFont(f);
-  //Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR)
-  armA = new Arm(200,200,250,200,0,50);
-  armB = new Arm(250,200,300,200,0,50);
-  armA.updateOffsetAngle(-60);
-  armB.updateOffsetAngle(-150);
-  circleA = new Circle(armA.x1, armA.y1, armA.R);
-  circleB = new Circle(armB.x2, armB.y2, armB.R);
-  size(800, 600);
-}
-
-Point[] getIntersections(float _x1, float _y1, float _x2, float _y2){
-  circleA.x = _x1;
-  circleA.y = _y1;
-  circleB.x = _x2;
-  circleB.y = _y2;
+Point[] getIntersections(Arm _arm, float _x2, float _y2, float _R){
+  Circle circleA = new Circle( _arm.x1, _arm.y1, _arm.R);
+  Circle circleB = new Circle( _x2, _y2, _R);
   Point[] returnValue = {circleA.intersections2(circleB), circleA.intersections1(circleB)};
   return returnValue;
 }
@@ -158,11 +136,11 @@ float getAngle(float _x1, float _y1, float _x2, float _y2){
   return angle;
 }
 
-float[] getMotorAngles(Point[] ints){
+float[] getMotorAngles(Point[] ints, float _x, float _y){
   float angleA1 = getAngle(armA.x1, armA.y1, ints[0].x, ints[0].y);
-  float angleB1 = getAngle(ints[0].x, ints[0].y, circleB.x, circleB.y );
+  float angleB1 = getAngle(ints[0].x, ints[0].y, _x, _y );
   float angleA2 = getAngle(armA.x1, armA.y1, ints[1].x, ints[1].y);
-  float angleB2 = getAngle(ints[1].x, ints[1].y, circleB.x, circleB.y );
+  float angleB2 = getAngle(ints[1].x, ints[1].y, _x, _y );
   float motorAngleA1 = angleA1 - armA.offsetAngle;
   float motorAngleB1 = angleB1 - angleA1 - armB.offsetAngle;
   float motorAngleA2 = angleA2 - armA.offsetAngle;
@@ -199,27 +177,16 @@ class LegalMove{
   }
 }
 
-void showLegalMoves(LegalMove[] _legalMoves){
-  println("In: showLegalMoves " +_legalMoves.length);
-  for(int i = 0; i < _legalMoves.length ; i++ ){
-    LegalMove lm = _legalMoves[i];
-    if(lm.legal){
-      stroke(100,100,100,100);
-      line(lm.x,lm.y,lm.x,lm.y);
-    }
-  }
-}
-
 LegalMove[] calcLegalMoves(){
-  println("In: calcLegalMoves");
+  //println("In: calcLegalMoves");
   LegalMove[] legalMoves = {};
   Point[] ints2;
   float[] motorAngles;
   boolean valid;
   for(int x = 0; x < width; x++){
     for(int y = 0; y < height; y++){
-      ints2 = getIntersections(armA.x1, armA.y1, x, y);
-      motorAngles = getMotorAngles(ints2);
+      ints2 = getIntersections(armA, x, y, armB.R);
+      motorAngles = getMotorAngles(ints2, x, y);
       valid = (motorAngles[0] >= 0 && motorAngles[0] <= 180) && (motorAngles[1] >= 0 && motorAngles[1] <= 180);
       valid = valid || (motorAngles[2] >= 0 && motorAngles[2] <= 180) && (motorAngles[3] >= 0 && motorAngles[3] <= 180);
       if(valid){
@@ -231,45 +198,90 @@ LegalMove[] calcLegalMoves(){
   return legalMoves;
 }
 
-void draw() {
-  // Invert Y axis
+void drawLegalMoves(LegalMove[] _legalMoves){
+  //println("In: showLegalMoves " +_legalMoves.length);
+  for(int i = 0; i < _legalMoves.length ; i++ ){
+    LegalMove lm = _legalMoves[i];
+    if(lm.legal){
+      stroke(100,100,100,100);
+      line(lm.x,lm.y,lm.x,lm.y);
+    }
+  }
+}
+
+void drawEnvelope(){
   pushMatrix();
   scale(1,-1);
   translate(0, -height);
-  
-  background(20);
-    
+      
   if(firstRun){
-    showLegalMoves(calcLegalMoves());
+    drawLegalMoves(calcLegalMoves());
     loadPixels();
     firstRun = false;
   }else{
     updatePixels();
   }
-  stroke(255);
-  noFill();
+  popMatrix();
+}
+
+int angle = 0;
+int direction = 1;
+LegalMove[] legalMoves = {};
+boolean firstRun = true;
+
+PFont f;
+
+void setup() {
+  f = createFont("Lucida Console", 14);
+  textFont(f);
+  size(800, 600);
+  
+  //SPEC: Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR)
+  armA = new Arm(600,100,700,100,0,100);
+  armB = new Arm(700,100,750,100,0,50);
+  armA.updateOffsetAngle(-60);
+  armB.updateOffsetAngle(-160);
+}
+
+void draw() {
+  // clear screen and draw envelope
+  background(20);
+  drawEnvelope();
+  
+  // Target coords
+  float targetX = mouseX;
+  float targetY = height - mouseY;
   
   // calculate intersections
-  Point[] ints = getIntersections(armA.x1, armA.y1, mouseX, height - mouseY);
-  float[] motorAngles = getMotorAngles(ints);
+  Point[] ints = getIntersections( armA, targetX, targetY, armB.R);
+  float[] motorAngles = getMotorAngles(ints, targetX, targetY);
   
+  // Invert Y axis
+  pushMatrix();
+  scale(1,-1);
+  translate(0, -height);
+  
+  stroke(255);
+  noFill();
+    
   // Draw Arms
   armA.drawArm();
   armB.drawArm();
   
+  // Draw preview arms
   if( (motorAngles[0] >= 0 && motorAngles[0] <= 180) && (motorAngles[1] >= 0 && motorAngles[1] <= 180) ){
     // Red Lines
     stroke(255,0,0);
     circle(ints[0].x,ints[0].y,10);
     line(armA.x1, armA.y1, ints[0].x, ints[0].y);
-    line(circleB.x, circleB.y, ints[0].x, ints[0].y);
+    line(targetX, targetY, ints[0].x, ints[0].y);
   }
   if( (motorAngles[2] >= 0 && motorAngles[2] <= 180) && (motorAngles[3] >= 0 && motorAngles[3] <= 180) ){
     // Green Lines
     stroke(0,255,0);
     circle(ints[1].x,ints[1].y,10);
     line(armA.x1, armA.y1, ints[1].x, ints[1].y);
-    line(circleB.x, circleB.y, ints[1].x, ints[1].y);
+    line(targetX, targetY, ints[1].x, ints[1].y);
   }
     
   popMatrix();
@@ -292,12 +304,3 @@ void draw() {
     direction = 1; 
   }
 }
-
-//Point intersection1result = testCircle1.intersections1(testCircle2);
-//  Point intersection2result = testCircle1.intersections2(testCircle2);
-//  //intersection1result = testCircle1.intersections1(testCircle2);
-//  //intersection2result = testCircle1.intersections2(testCircle2);
-//  println(intersection1result.x);
-//  println(intersection1result.y);
-//  println(intersection2result.x);
-//  println(intersection2result.y);
