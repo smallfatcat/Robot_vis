@@ -22,10 +22,6 @@ class Point{
   }
 }
 
-//Point Point;
-Circle circleA, circleB, circleC, circleD;
-Arm armA, armB;
-
 class Circle {
   float x, y, r, left;
   Circle(float cx, float cy, float cr) {
@@ -224,12 +220,15 @@ void drawEnvelope(){
   popMatrix();
 }
 
+Arm armA, armB;
+PFont f;
+
 int angle = 0;
 int direction = 1;
 LegalMove[] legalMoves = {};
 boolean firstRun = true;
 
-PFont f;
+
 
 void setup() {
   f = createFont("Lucida Console", 14);
