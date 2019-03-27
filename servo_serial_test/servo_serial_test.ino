@@ -23,7 +23,7 @@ int memoryLength = 20;
 // Animation frame
 int animFrame = 0;
 int animCounter = 0;
-int animInterval = 100;
+int animInterval = 1000;
 bool animReached = false;
 int frameCount = 0;
 
@@ -46,7 +46,16 @@ int joyPinX = 1;
 int joyPinY = 0;
 int potA = 3;
 int potB = 2;
+// speed vars
 int rotSpeed = 1;
+bool inTimerLoop = false;
+unsigned long timerStart = 0;
+unsigned long timerLoopDuration = 30;
+
+bool inAnimTimerLoop = false;
+unsigned long animTimerStart = 0;
+unsigned long animTimerLoopDuration = 1000;
+
 // Joystick States
 int valX, valY, valA, valB;
 // Joystick Deadzones (Range is 0-1023)
@@ -134,37 +143,44 @@ void serialOutput(){
 }
 
 void moveServos(){
-  if(cangleA<tangleA){
-    cangleA += rotSpeed;
-    servoA.write(cangleA);
+  if(!inTimerLoop){
+    timerStart = millis();
+    inTimerLoop = true;
   }
-  if(cangleA>tangleA){
-    cangleA -= rotSpeed;
-    servoA.write(cangleA);
-  }
-  if(cangleB<tangleB){
-    cangleB += rotSpeed;
-    servoB.write(cangleB);
-  }
-  if(cangleB>tangleB){
-    cangleB -= rotSpeed;
-    servoB.write(cangleB);
-  }
-  if(cangleC<tangleC){
-    cangleC += rotSpeed;
-    servoC.write(cangleC);
-  }
-  if(cangleC>tangleC){
-    cangleC -= rotSpeed;
-    servoC.write(cangleC);
-  }
-  if(cangleD<tangleD){
-    cangleD += rotSpeed;
-    servoD.write(cangleD);
-  }
-  if(cangleD>tangleD){
-    cangleD -= rotSpeed;
-    servoD.write(cangleD);
+  if(millis()-timerStart > timerLoopDuration){
+    inTimerLoop = false;
+    if(cangleA<tangleA){
+      cangleA += rotSpeed;
+      servoA.write(cangleA);
+    }
+    if(cangleA>tangleA){
+      cangleA -= rotSpeed;
+      servoA.write(cangleA);
+    }
+    if(cangleB<tangleB){
+      cangleB += rotSpeed;
+      servoB.write(cangleB);
+    }
+    if(cangleB>tangleB){
+      cangleB -= rotSpeed;
+      servoB.write(cangleB);
+    }
+    if(cangleC<tangleC){
+      cangleC += rotSpeed;
+      servoC.write(cangleC);
+    }
+    if(cangleC>tangleC){
+      cangleC -= rotSpeed;
+      servoC.write(cangleC);
+    }
+    if(cangleD<tangleD){
+      cangleD += rotSpeed;
+      servoD.write(cangleD);
+    }
+    if(cangleD>tangleD){
+      cangleD -= rotSpeed;
+      servoD.write(cangleD);
+    }
   }
 }
 
@@ -223,7 +239,7 @@ void debounce(){
 }
 
 void savePosition(){
-  if(mode == 0){
+  if(mode == 0 || mode == 2){
     mangleA[animFrame] = cangleA;
     mangleB[animFrame] = cangleB;
     mangleC[animFrame] = cangleC;
@@ -237,36 +253,41 @@ void savePosition(){
 }
 
 void startAnimation(){
-  if(mode == 0){
+  if(mode == 0 || mode == 2){
     mangleA[animFrame] = -1;
     mangleB[animFrame] = -1;
     mangleC[animFrame] = -1;
     mangleD[animFrame] = -1;
     animFrame = 0;
+    inAnimTimerLoop = false;
     mode = 1;
   }
 }
 
 void animate(){
-  animCounter++;
+  // Check if end of memory
   if(mangleA[animFrame]== -1){
-    animFrame = 0;
+      animFrame = 0;
   }
-  if(tangleA == cangleA && tangleB == cangleB && tangleC == cangleC && tangleD == cangleD && !animReached){
-    animCounter = animInterval - 10;
-    animReached = true;
+  // set target angle to memory value
+  tangleA = mangleA[animFrame];
+  tangleB = mangleB[animFrame];
+  tangleC = mangleC[animFrame];
+  tangleD = mangleD[animFrame];
+  // wait till target reached
+  if(tangleA == cangleA && tangleB == cangleB && tangleC == cangleC && tangleD == cangleD && !inAnimTimerLoop){
+    // start timer
+    animTimerStart = millis();
+    inAnimTimerLoop = true;
   }
-  if(animCounter>animInterval){
-    animReached = false;
-    animCounter = 0;
-    tangleA = mangleA[animFrame];
-    tangleB = mangleB[animFrame];
-    tangleC = mangleC[animFrame];
-    tangleD = mangleD[animFrame];
+  // when timer expires, increment memory position
+  if(millis() - animTimerStart > animTimerLoopDuration && inAnimTimerLoop){
     animFrame++;
     if(animFrame==memoryLength){
       animFrame = 0;
     }
+    // Reset timer
+    inAnimTimerLoop = false;
   }
 }
 
