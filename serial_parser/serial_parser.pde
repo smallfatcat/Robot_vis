@@ -7,11 +7,13 @@ PFont f;
 int mousePressedX = 0;
 int mousePressedY = 0;
 int mousePressedOn = 0;
-boolean validDrag = true;
+boolean validDrag = false;
 int startAngle = 0;
 int[] setAngles = {90,90,90,90};
 int[] setBoxesX = {300, 350, 400, 450};
 boolean[] overBox = {false, false, false, false};
+int[] button1 = {900,10,950,40};
+int[] button2 = {840,10,890,40};
 
 int frameCounter = 0;
 
@@ -46,8 +48,8 @@ void setup() {
   // Arm Vis code
   
   //SPEC: Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR)
-  armA = new Arm(750,100,850,100,0,100);
-  armB = new Arm(850,100,900,100,0,50);
+  armA = new Arm(800,100,858,100,0,58);
+  armB = new Arm(858,100,900,100,0,42);
   armA.updateOffsetAngle(-60);
   armB.updateOffsetAngle(-160);
 }
@@ -65,6 +67,14 @@ void mousePressed() {
       startAngle = setAngles[i];
       validDrag = true;
     }
+  }
+  if(mouseX >= button1[0] && mouseX <= button1[2] && mouseY >= button1[1] && mouseY <= button1[3]){
+    myPort.write("M\n");
+    print("button1 Pressed");
+  }
+  if(mouseX >= button2[0] && mouseX <= button2[2] && mouseY >= button2[1] && mouseY <= button2[3]){
+    myPort.write("P\n");
+    print("button2 Pressed");
   }
 }
 
@@ -85,11 +95,18 @@ void dragSetAngleBoxes(){
       setAngles[mousePressedOn] = 180;
     }
     if(previousAngle != setAngles[mousePressedOn]){
-      String outputText = "S A" + setAngles[0] + ",B" + setAngles[1] + ",C" + setAngles[2] + ",D" + setAngles[3] + ",\n";
-      myPort.write(outputText);
-      print(outputText);
+      //String outputText = "S A" + setAngles[0] + ",B" + setAngles[1] + ",C" + setAngles[2] + ",D" + setAngles[3] + ",\n";
+      //myPort.write(outputText);
+      //print(outputText);
+      sendNewAngles(setAngles, "Drag: ");
     }
   }
+}
+
+void sendNewAngles(int[] _setAngles, String _text){
+  String outputText = "S A" + _setAngles[0] + ",B" + _setAngles[1] + ",C" + _setAngles[2] + ",D" + _setAngles[3] + ",\n";
+  myPort.write(outputText);
+  println(_text + outputText);
 }
 
 void draw() {
@@ -125,7 +142,7 @@ void draw() {
   // Draw Arms
   armA.drawArm();
   armB.drawArm();
-  
+  boolean angleSent = false;
   // Draw preview arms
   if( (motorAngles[0] >= 0 && motorAngles[0] <= 180) && (motorAngles[1] >= 0 && motorAngles[1] <= 180) ){
     // Red Lines
@@ -133,6 +150,14 @@ void draw() {
     circle(ints[0].x,ints[0].y,10);
     line(armA.x1, armA.y1, ints[0].x, ints[0].y);
     line(targetX, targetY, ints[0].x, ints[0].y);
+    if(mousePressed && !angleSent){
+      if(setAngles[0] != int(motorAngles[0]) || setAngles[1] != int(motorAngles[1])){
+        setAngles[0] = int(motorAngles[0]);
+        setAngles[1] = int(motorAngles[1]);
+        sendNewAngles(setAngles, "1st motor: ");
+        angleSent = true;
+      }
+    }
   }
   if( (motorAngles[2] >= 0 && motorAngles[2] <= 180) && (motorAngles[3] >= 0 && motorAngles[3] <= 180) ){
     // Green Lines
@@ -140,9 +165,22 @@ void draw() {
     circle(ints[1].x,ints[1].y,10);
     line(armA.x1, armA.y1, ints[1].x, ints[1].y);
     line(targetX, targetY, ints[1].x, ints[1].y);
+    if(mousePressed && !angleSent){
+      if(setAngles[0] != int(motorAngles[2]) || setAngles[1] != int(motorAngles[3])){
+        setAngles[0] = int(motorAngles[2]);
+        setAngles[1] = int(motorAngles[3]);
+        sendNewAngles(setAngles, "2nd motor: ");
+      }
+    }
   }
     
   popMatrix();
+  
+  // Button
+  rect(button1[0], button1[1], button1[2] - button1[0], button1[3] - button1[1]);
+  text("Save", button1[0] + 8, button1[1] + 20);
+  rect(button2[0], button2[1], button2[2] - button2[0], button2[3] - button2[1]);
+  text("Play", button2[0] + 8, button2[1] + 20);
   
   // Set Angle Boxes
   dragSetAngleBoxes();

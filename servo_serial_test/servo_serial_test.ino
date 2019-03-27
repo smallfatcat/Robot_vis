@@ -14,11 +14,11 @@ int angleA = 90, angleB = 90, angleC = 90, angleD = 90;
 // Target Servo Angles
 int tangleA = 90, tangleB = 90, tangleC = 90, tangleD = 90;
 // Memory Angles
-int mangleA[20];
-int mangleB[20];
-int mangleC[20];
-int mangleD[20];
-int memoryLength = 20;
+int mangleA[50];
+int mangleB[50];
+int mangleC[50];
+int mangleD[50];
+int memoryLength = 50;
 
 // Animation frame
 int animFrame = 0;
@@ -127,7 +127,7 @@ void serialOutput(){
   Serial.print(" A:");
   Serial.print(cangleA);
   Serial.print(" B:");
-  Serial.print(cangleB);
+  Serial.print(180-cangleB); // invert B axis
   Serial.print(" C:");
   Serial.print(cangleC);
   Serial.print(" D:");
@@ -313,10 +313,20 @@ void parseSerial(){
     if(inputString.startsWith("S")){
       mode = 2;
       tangleA = angleSubstring("A");
-      tangleB = angleSubstring("B");
+      tangleB = 180 - angleSubstring("B");   // Invert B axis
       tangleC = angleSubstring("C");
       tangleD = angleSubstring("D");
       //Serial.println(angleString);
+      serialOutput();
+    }
+    if(inputString.startsWith("M")){
+      mode = 2;
+      savePosition();
+      serialOutput();
+    }
+    if(inputString.startsWith("P")){
+      mode = 2;
+      startAnimation();
       serialOutput();
     }
     // clear the string:
