@@ -16,13 +16,30 @@ void mousePressed() {
   // Check if buttons pressed
   for(int i = 0; i < buttons.length; i++){
     Button but = buttons[i];
-    if(mouseX >= but.x1 && mouseX <=but.x2 && mouseY >= but.y1 && mouseY <= but.y2){
+    if(but.isOverButton(mouseX, mouseY)){
       myPort.write(but.serialCommand + "\n");
-      print(but.label+" Pressed");
+      println(but.label+" Pressed");
     }
   }
 }
 
 void mouseReleased() {
   validDrag = false;
+}
+
+void keyPressed() {
+  if(!portChosen){
+    if(key == '1'){
+      myPort = new Serial(this, Serial.list()[0], 38400);
+      myPort.clear();
+      myPort.bufferUntil(lf);
+      portChosen = true;
+    }
+    if(key == '2'){
+      myPort = new Serial(this, Serial.list()[1], 38400);
+      myPort.clear();
+      myPort.bufferUntil(lf);
+      portChosen = true;
+    }
+  }
 }

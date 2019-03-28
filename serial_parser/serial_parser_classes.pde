@@ -9,6 +9,10 @@ class Button {
     label = _label;
     serialCommand = _serialCommand;
   }
+  boolean isOverButton(int x, int y){
+    boolean returnValue = x >= x1 && x <=x2 && y >= y1 && y <= y2;
+    return returnValue;
+  }
 }
 
 class Arm {

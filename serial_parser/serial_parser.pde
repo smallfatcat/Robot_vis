@@ -39,25 +39,19 @@ int boxSpan = 360;
 int boxWidth = 40;
 int boxHeight = 30;
 
+boolean portChosen = false;
+String[] sl;
+
 void setup() {
   size(1000, 600);
   frameRate(100);
   f = createFont("Lucida Console", 14);
   textFont(f);
+  
+  // Get serial ports
+  sl = Serial.list();
     
-  // List all the available serial ports
-  //printArray(Serial.list());
-  // Open the port you are using at the rate you want:
-  myPort = new Serial(this, Serial.list()[1], 38400);
-  myPort.clear();
-  // Throw out the first reading, in case we started reading 
-  // in the middle of a string from the sender.
-  myPort.bufferUntil(lf);
-  //serialText = myPort.readStringUntil(lf);
-  //serialText = null;
-  
   // Arm Vis code
-  
   //SPEC: Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR)
   armA = new Arm(800,100,858,100,0,58);
   armB = new Arm(858,100,900,100,0,42);
@@ -65,7 +59,24 @@ void setup() {
   armB.updateOffsetAngle(-160);
 }
 
-void draw() {
+void draw(){
+  if(portChosen){
+    mainDraw();
+  }
+  else{
+    // List all the available serial ports
+    background(20);
+    stroke(255);
+    text("Select serial port to use:", 20, 20);
+    for(int i = 0; i < sl.length; i++){
+      //println(sl[i]);
+      text(sl[i] + " [" + (i+1)+"]", 20, 40 + (i*20));
+    }
+  }
+}
+
+
+void mainDraw() {
   // Every 10 frames send a serial message to arduino to get info
   if(frameCount%10 == 0){
     // Request current angles
@@ -80,14 +91,6 @@ void draw() {
   text(" frameCounter: " + frameCounter, 20, 60);
   text(" frameCounter2: " + frameCount, 200, 60);
   
-  // Store Target coords from mouse position
-  float targetX = mouseX;
-  float targetY = height - mouseY;
-  
-  // calculate intersections
-  Point[] ints = getIntersections( armA, targetX, targetY, armB.R);
-  float[] motorAngles = getMotorAngles(ints, targetX, targetY);
-  
   // Invert Y axis
   pushMatrix();
   scale(1,-1);
@@ -95,6 +98,18 @@ void draw() {
   
   stroke(255);
   noFill();
+ 
+   // Store Target coords from mouse position
+  float targetX = mouseX;
+  float targetY = height - mouseY;
+  
+  // calculate intersections
+  Point[] ints = getIntersections( armA, targetX, targetY, armB.R);
+  float[] motorAngles = getMotorAngles(ints, targetX, targetY);
+  float motAngA1 = motorAngles[0];
+  float motAngB1 = motorAngles[1];
+  float motAngA2 = motorAngles[2];
+  float motAngB2 = motorAngles[3];
     
   // Draw Arms
   armA.drawArm();
@@ -102,39 +117,27 @@ void draw() {
     
   // Draw preview arms
   boolean angleSent = false;
-  if( (motorAngles[0] >= 0 && motorAngles[0] <= 180) && (motorAngles[1] >= 0 && motorAngles[1] <= 180) ){
+  if( validRange(motAngA1) && validRange(motAngB1) ){
     // Red Lines
     stroke(255,0,0);
-    circle(ints[0].x,ints[0].y,10);
-    line(armA.x1, armA.y1, ints[0].x, ints[0].y);
-    line(targetX, targetY, ints[0].x, ints[0].y);
+    drawPreviewArm(ints[0], armA, targetX, targetY);
     if(mousePressed && !angleSent){
-      if(setAngles[0] != int(motorAngles[0]) || setAngles[1] != int(motorAngles[1])){
-        setAngles[0] = int(motorAngles[0]);
-        setAngles[1] = int(motorAngles[1]);
-        sendNewAngles(setAngles, "1st motor: ");
-        angleSent = true;
-      }
+      angleSent = setNewAngles(motAngA1, motAngB1);
     }
   }
-  if( (motorAngles[2] >= 0 && motorAngles[2] <= 180) && (motorAngles[3] >= 0 && motorAngles[3] <= 180) ){
+  if( validRange(motAngA2) && validRange(motAngB2) ){
     // Green Lines
     stroke(0,255,0);
-    circle(ints[1].x,ints[1].y,10);
-    line(armA.x1, armA.y1, ints[1].x, ints[1].y);
-    line(targetX, targetY, ints[1].x, ints[1].y);
+    drawPreviewArm(ints[1], armA, targetX, targetY);
     if(mousePressed && !angleSent){
-      if(setAngles[0] != int(motorAngles[2]) || setAngles[1] != int(motorAngles[3])){
-        setAngles[0] = int(motorAngles[2]);
-        setAngles[1] = int(motorAngles[3]);
-        sendNewAngles(setAngles, "2nd motor: ");
-      }
+      setNewAngles(motAngA2, motAngB2);
     }
   }
     
   popMatrix();
   
   // Button
+  stroke(255);
   drawButtons();
     
   // Draw Set Angle Boxes
@@ -142,10 +145,9 @@ void draw() {
   for(int i = 0; i < 4; i++){
     drawBox(str(setAngles[i]), setBoxesX[i]);
     overBox[i] = mouseInBox(setAngles[i], setBoxesX[i]);
-    //text(" inBox" + labels[i] + " " + overBox[i], 20, 160+ (i*20));
   }
   
-  // Draw Read Angle Boxes
+  // Draw Current Angle Boxes
   if (serialText != null) {
     frameCounter++;
     String serialHeader = serialText.substring(0,7);
@@ -155,17 +157,17 @@ void draw() {
     if(serialHeader.equals("Current")){
       for(int i = 0; i < 4; i++){
         currentAngles[i] = getAngleFromSerial(serialText, labels[i]);
-        //text(" readAngle" + labels[i] + " " + currentAngles[i], 20, 80 + (i*20));
-        
+        String curAngle = currentAngles[i];
+                
         // Read Angle Boxes
-        drawBox(currentAngles[i], 50 + (i*50));
+        drawBox(curAngle, 50 + (i*50));
         
         // update Preview Angles for A and B
         if(i==0){
-          armA.updateAngle(float(currentAngles[i]));
+          armA.updateAngle(float(curAngle));
         }
         if(i==1){
-          armB.updateAngle(float(currentAngles[i]));
+          armB.updateAngle(float(curAngle));
           armB.updateParentAngle(armA.worldAngle);
           armB.updatePivot(armA.x2,armA.y2);
         }

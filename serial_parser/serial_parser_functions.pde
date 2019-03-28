@@ -1,10 +1,29 @@
 void drawButtons(){
-  stroke(255);
   for(int i = 0; i < buttons.length; i++){
     Button but = buttons[i];
     rect(but.x1, but.y1, but.x2 - but.x1, but.y2 - but.y1);
     text(but.label, but.x1 + 8, but.y1 + 20);
   }
+}
+
+boolean validRange(float angle){
+  return angle >= 0 && angle <= 180;
+}
+
+void drawPreviewArm(Point intersection, Arm arm, float targetX, float targetY){
+  circle(intersection.x,intersection.y,10);
+  line(arm.x1, arm.y1, intersection.x, intersection.y);
+  line(targetX, targetY, intersection.x, intersection.y);
+}
+
+boolean setNewAngles(float motAngA1, float motAngB1){
+  if(setAngles[0] != int(motAngA1) || setAngles[1] != int(motAngB1)){
+    setAngles[0] = int(motAngA1);
+    setAngles[1] = int(motAngB1);
+    sendNewAngles(setAngles);
+    return true;
+  }
+  return false;
 }
 
 void dragSetAngleBoxes(){
@@ -23,15 +42,15 @@ void dragSetAngleBoxes(){
       //String outputText = "S A" + setAngles[0] + ",B" + setAngles[1] + ",C" + setAngles[2] + ",D" + setAngles[3] + ",\n";
       //myPort.write(outputText);
       //print(outputText);
-      sendNewAngles(setAngles, "Drag: ");
+      sendNewAngles(setAngles);
     }
   }
 }
 
-void sendNewAngles(int[] _setAngles, String _text){
+void sendNewAngles(int[] _setAngles){
   String outputText = "S A" + _setAngles[0] + ",B" + _setAngles[1] + ",C" + _setAngles[2] + ",D" + _setAngles[3] + ",\n";
   myPort.write(outputText);
-  println(_text + outputText);
+  //println(_text + outputText);
 }
 
 String getAngleFromSerial(String input, String label){
