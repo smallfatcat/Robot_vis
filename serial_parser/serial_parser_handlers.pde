@@ -18,6 +18,7 @@ void mousePressed() {
     Button but = buttons[i];
     if(but.isOverButton(mouseX, mouseY)){
       myPort.write(but.serialCommand + "\n");
+      lastSerialSend = but.serialCommand;
       println(but.label+" Pressed");
     }
   }
@@ -29,14 +30,26 @@ void mouseReleased() {
 
 void keyPressed() {
   if(!portChosen){
-    if(key == '1'){
+    boolean serialSet = false;
+    int len = Serial.list().length;
+    if(key == '1' && len >= 1){
       myPort = new Serial(this, Serial.list()[0], 38400);
-      myPort.clear();
-      myPort.bufferUntil(lf);
-      portChosen = true;
+      serialSet = true;
     }
-    if(key == '2'){
+    if(key == '2' && len >= 2){
       myPort = new Serial(this, Serial.list()[1], 38400);
+      serialSet = true;
+    }
+    if(key == '3' && len >= 3){
+      myPort = new Serial(this, Serial.list()[2], 38400);
+      serialSet = true;
+    }
+    if(key == '4' && len >= 3){
+      myPort = new Serial(this, Serial.list()[3], 38400);
+      serialSet = true;
+    }
+
+    if(serialSet){
       myPort.clear();
       myPort.bufferUntil(lf);
       portChosen = true;

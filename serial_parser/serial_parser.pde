@@ -42,6 +42,8 @@ int boxHeight = 30;
 boolean portChosen = false;
 String[] sl;
 
+String lastSerialSend = "";
+
 void setup() {
   size(1000, 600);
   frameRate(100);
@@ -90,6 +92,7 @@ void mainDraw() {
   fill(200,200,200);
   text(" frameCounter: " + frameCounter, 20, 60);
   text(" frameCounter2: " + frameCount, 200, 60);
+  text(" LastSent: " + lastSerialSend, 20, 40);
   
   // Invert Y axis
   pushMatrix();
@@ -151,9 +154,8 @@ void mainDraw() {
   if (serialText != null) {
     frameCounter++;
     String serialHeader = serialText.substring(0,7);
-    text(" Output: " + serialText, 20, 20);
-    text(" serialHeader: " + serialHeader, 20, 40);
-    
+    text(" LastRCVD: " + serialText, 20, 20);
+        
     if(serialHeader.equals("Current")){
       for(int i = 0; i < 4; i++){
         currentAngles[i] = getAngleFromSerial(serialText, labels[i]);

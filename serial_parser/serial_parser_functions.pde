@@ -50,6 +50,7 @@ void dragSetAngleBoxes(){
 void sendNewAngles(int[] _setAngles){
   String outputText = "S A" + _setAngles[0] + ",B" + _setAngles[1] + ",C" + _setAngles[2] + ",D" + _setAngles[3] + ",\n";
   myPort.write(outputText);
+  lastSerialSend = outputText;
   //println(_text + outputText);
 }
 
