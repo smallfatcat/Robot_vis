@@ -36,14 +36,12 @@ class Arm {
     x2 = (R * cos( radians(worldAngle) ) ) + x1;
     y2 = (R * sin( radians(worldAngle) ) ) + y1;
     setWorldAngle();
-   
   }
   void updateAngle(float aangle){
     angle = aangle;
     x2 = (R * cos( radians(worldAngle) ) ) + x1;
     y2 = (R * sin( radians(worldAngle) ) ) + y1;
     setWorldAngle();
-    
   }
   void updateParentAngle(float aparentAngle){
     parentAngle = aparentAngle;
