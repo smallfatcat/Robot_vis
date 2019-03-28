@@ -1,3 +1,16 @@
+class Button {
+  int x1, y1, x2, y2;
+  String label, serialCommand;
+  Button(String _label, String _serialCommand, int _x1, int _y1, int _x2, int _y2){
+    x1 = _x1;
+    y1 = _y1;
+    x2 = _x2;
+    y2 = _y2;
+    label = _label;
+    serialCommand = _serialCommand;
+  }
+}
+
 class Arm {
   float x1, y1, x2, y2, angle, R, parentAngle, offsetAngle, worldAngle;
   Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR){
@@ -52,11 +65,14 @@ class Arm {
   }
 }
 
-Point[] getIntersections(Arm _arm, float _x2, float _y2, float _R){
-  Circle circleA = new Circle( _arm.x1, _arm.y1, _arm.R);
-  Circle circleB = new Circle( _x2, _y2, _R);
-  Point[] returnValue = {circleA.intersections2(circleB), circleA.intersections1(circleB)};
-  return returnValue;
+class LegalMove{
+  boolean legal;
+  int x, y;
+  LegalMove(boolean _legal, int _x, int _y){
+    legal = _legal;
+    x = _x;
+    y = _y;
+  }
 }
 
 class Point{

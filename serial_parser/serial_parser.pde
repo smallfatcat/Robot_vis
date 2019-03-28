@@ -17,13 +17,14 @@ int[] setBoxesX = {300, 350, 400, 450};
 boolean[] overBox = {false, false, false, false};
 
 // Button vars
-int[] button1 = {900,10,950,40};
-int[] button2 = {840,10,890,40};
+Button button0 = new Button("Save", "M", 900, 10, 950, 40);
+Button button1 = new Button("Play", "P", 840, 10, 890, 40);
+Button[] buttons = {button0, button1};
 
 int frameCounter = 0;
 
 // For each axis
-String[] readAngles = new String[4];
+String[] currentAngles = new String[4];
 String[] labels = {"A:","B:","C:","D:"};
 
 // Arm vis vars
@@ -65,9 +66,10 @@ void setup() {
 }
 
 void draw() {
+  // Every 10 frames send a serial message to arduino to get info
   if(frameCount%10 == 0){
+    // Request current angles
     myPort.write("R\n");
-    //println("Trigger");
   }
  
   // clear screen and draw envelope
@@ -78,7 +80,7 @@ void draw() {
   text(" frameCounter: " + frameCounter, 20, 60);
   text(" frameCounter2: " + frameCount, 200, 60);
   
-  // Target coords
+  // Store Target coords from mouse position
   float targetX = mouseX;
   float targetY = height - mouseY;
   
@@ -97,8 +99,9 @@ void draw() {
   // Draw Arms
   armA.drawArm();
   armB.drawArm();
-  boolean angleSent = false;
+    
   // Draw preview arms
+  boolean angleSent = false;
   if( (motorAngles[0] >= 0 && motorAngles[0] <= 180) && (motorAngles[1] >= 0 && motorAngles[1] <= 180) ){
     // Red Lines
     stroke(255,0,0);
@@ -132,12 +135,9 @@ void draw() {
   popMatrix();
   
   // Button
-  rect(button1[0], button1[1], button1[2] - button1[0], button1[3] - button1[1]);
-  text("Save", button1[0] + 8, button1[1] + 20);
-  rect(button2[0], button2[1], button2[2] - button2[0], button2[3] - button2[1]);
-  text("Play", button2[0] + 8, button2[1] + 20);
-  
-  // Set Angle Boxes
+  drawButtons();
+    
+  // Draw Set Angle Boxes
   dragSetAngleBoxes();
   for(int i = 0; i < 4; i++){
     drawBox(str(setAngles[i]), setBoxesX[i]);
@@ -145,6 +145,7 @@ void draw() {
     //text(" inBox" + labels[i] + " " + overBox[i], 20, 160+ (i*20));
   }
   
+  // Draw Read Angle Boxes
   if (serialText != null) {
     frameCounter++;
     String serialHeader = serialText.substring(0,7);
@@ -153,15 +154,18 @@ void draw() {
     
     if(serialHeader.equals("Current")){
       for(int i = 0; i < 4; i++){
-        readAngles[i] = getAngleFromSerial(serialText, labels[i]);
-        text(" readAngle" + labels[i] + " " + readAngles[i], 20, 80 + (i*20));
+        currentAngles[i] = getAngleFromSerial(serialText, labels[i]);
+        //text(" readAngle" + labels[i] + " " + currentAngles[i], 20, 80 + (i*20));
+        
         // Read Angle Boxes
-        drawBox(readAngles[i], 50 + (i*50));
+        drawBox(currentAngles[i], 50 + (i*50));
+        
+        // update Preview Angles for A and B
         if(i==0){
-          armA.updateAngle(float(readAngles[i]));
+          armA.updateAngle(float(currentAngles[i]));
         }
         if(i==1){
-          armB.updateAngle(float(readAngles[i]));
+          armB.updateAngle(float(currentAngles[i]));
           armB.updateParentAngle(armA.worldAngle);
           armB.updatePivot(armA.x2,armA.y2);
         }

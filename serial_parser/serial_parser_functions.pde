@@ -1,3 +1,12 @@
+void drawButtons(){
+  stroke(255);
+  for(int i = 0; i < buttons.length; i++){
+    Button but = buttons[i];
+    rect(but.x1, but.y1, but.x2 - but.x1, but.y2 - but.y1);
+    text(but.label, but.x1 + 8, but.y1 + 20);
+  }
+}
+
 void dragSetAngleBoxes(){
   int offsetY;
   if(mousePressed && validDrag){
@@ -67,6 +76,13 @@ boolean mouseInBox(int setAngle, int setBoxX){
 //
 // Arm vis functions
 //
+Point[] getIntersections(Arm _arm, float _x2, float _y2, float _R){
+  Circle circleA = new Circle( _arm.x1, _arm.y1, _arm.R);
+  Circle circleB = new Circle( _x2, _y2, _R);
+  Point[] returnValue = {circleA.intersections2(circleB), circleA.intersections1(circleB)};
+  return returnValue;
+}
+
 float getAngle(float _x1, float _y1, float _x2, float _y2){
   float angle = degrees( atan2( (_y2 - _y1) , ( _x2 - _x1) ) );
   return angle;
@@ -103,13 +119,29 @@ void drawAngleInfo(float motorAngleA1, float motorAngleB1, float motorAngleA2, f
   fill(255);
 }
 
-class LegalMove{
-  boolean legal;
-  int x, y;
-  LegalMove(boolean _legal, int _x, int _y){
-    legal = _legal;
-    x = _x;
-    y = _y;
+void drawEnvelope(){
+  pushMatrix();
+  scale(1,-1);
+  translate(0, -height);
+      
+  if(firstRun){
+    drawLegalMoves(calcLegalMoves());
+    loadPixels();
+    firstRun = false;
+  }else{
+    updatePixels();
+  }
+  popMatrix();
+}
+
+void drawLegalMoves(LegalMove[] _legalMoves){
+  //println("In: showLegalMoves " +_legalMoves.length);
+  for(int i = 0; i < _legalMoves.length ; i++ ){
+    LegalMove lm = _legalMoves[i];
+    if(lm.legal){
+      stroke(100,100,100,100);
+      line(lm.x,lm.y,lm.x,lm.y);
+    }
   }
 }
 
@@ -132,30 +164,4 @@ LegalMove[] calcLegalMoves(){
     }
   }
   return legalMoves;
-}
-
-void drawLegalMoves(LegalMove[] _legalMoves){
-  //println("In: showLegalMoves " +_legalMoves.length);
-  for(int i = 0; i < _legalMoves.length ; i++ ){
-    LegalMove lm = _legalMoves[i];
-    if(lm.legal){
-      stroke(100,100,100,100);
-      line(lm.x,lm.y,lm.x,lm.y);
-    }
-  }
-}
-
-void drawEnvelope(){
-  pushMatrix();
-  scale(1,-1);
-  translate(0, -height);
-      
-  if(firstRun){
-    drawLegalMoves(calcLegalMoves());
-    loadPixels();
-    firstRun = false;
-  }else{
-    updatePixels();
-  }
-  popMatrix();
 }

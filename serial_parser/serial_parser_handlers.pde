@@ -12,13 +12,14 @@ void mousePressed() {
       validDrag = true;
     }
   }
-  if(mouseX >= button1[0] && mouseX <= button1[2] && mouseY >= button1[1] && mouseY <= button1[3]){
-    myPort.write("M\n");
-    print("button1 Pressed");
-  }
-  if(mouseX >= button2[0] && mouseX <= button2[2] && mouseY >= button2[1] && mouseY <= button2[3]){
-    myPort.write("P\n");
-    print("button2 Pressed");
+  
+  // Check if buttons pressed
+  for(int i = 0; i < buttons.length; i++){
+    Button but = buttons[i];
+    if(mouseX >= but.x1 && mouseX <=but.x2 && mouseY >= but.y1 && mouseY <= but.y2){
+      myPort.write(but.serialCommand + "\n");
+      print(but.label+" Pressed");
+    }
   }
 }
 
