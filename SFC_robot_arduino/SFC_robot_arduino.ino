@@ -9,6 +9,14 @@ bool stringComplete = false;  // whether the string is complete
 
 // Servo Objects
 Servo servoA, servoB, servoC, servoD;
+int lowLimitA = 400;
+int lowLimitB = 400;
+int lowLimitC = 400;
+int lowLimitD = 400;
+int highLimitA = 2500;
+int highLimitB = 2500;
+int highLimitC = 2500;
+int highLimitD = 2500;
 
 // Current Servo Angles
 int cangleA = 90, cangleB = 90, cangleC = 90, cangleD = 90;
@@ -72,10 +80,10 @@ void setup() {
   inputString.reserve(200);
   pinMode(buttonPinA, INPUT_PULLUP);
   pinMode(buttonPinB, INPUT_PULLUP);
-  servoA.attach(11);
-  servoB.attach(9);
-  servoC.attach(10);
-  servoD.attach(6);
+  servoA.attach(11, lowLimitA, highLimitA);
+  servoB.attach( 9, lowLimitB, highLimitB);
+  servoC.attach(10, lowLimitC, highLimitC);
+  servoD.attach( 6, lowLimitD, highLimitD);
   //Serial.println("Start");
   // Handle Serial Output
 //  Serial.print("Current Angles");
