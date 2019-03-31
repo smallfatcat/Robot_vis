@@ -80,10 +80,10 @@ void setup() {
   inputString.reserve(200);
   pinMode(buttonPinA, INPUT_PULLUP);
   pinMode(buttonPinB, INPUT_PULLUP);
-  servoA.attach(11, lowLimitA, highLimitA);
-  servoB.attach( 9, lowLimitB, highLimitB);
-  servoC.attach(10, lowLimitC, highLimitC);
-  servoD.attach( 6, lowLimitD, highLimitD);
+  servoA.attach( 9, lowLimitA, highLimitA);
+  servoB.attach(10, lowLimitB, highLimitB);
+  servoC.attach( 6, lowLimitC, highLimitC);
+  servoD.attach(11, lowLimitD, highLimitD);
   //Serial.println("Start");
   // Handle Serial Output
 //  Serial.print("Current Angles");
@@ -135,10 +135,10 @@ void joystick(){
 void serialOutput(){
   frameCount++;
   Serial.print("Current Angles");
-  Serial.print(" A:");
-  Serial.print(cangleA);
+  Serial.print(" A:"); // invert A axis
+  Serial.print(180-cangleA);
   Serial.print(" B:");
-  Serial.print(180-cangleB); // invert B axis
+  Serial.print(cangleB);
   Serial.print(" C:");
   Serial.print(cangleC);
   Serial.print(" D:");
@@ -323,8 +323,8 @@ void parseSerial(){
     }
     if(inputString.startsWith("S")){
       mode = 2;
-      tangleA = angleSubstring("A");
-      tangleB = 180 - angleSubstring("B");   // Invert B axis
+      tangleA = 180 - angleSubstring("A");  // Invert A axis
+      tangleB = angleSubstring("B");  
       tangleC = angleSubstring("C");
       tangleD = angleSubstring("D");
       //Serial.println(angleString);
