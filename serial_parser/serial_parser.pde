@@ -57,8 +57,8 @@ void setup() {
   //SPEC: Arm(float ax1, float ay1, float ax2, float ay2, float aangle, float aR)
   armA = new Arm(800,100,858,100,0,58);
   armB = new Arm(858,100,900,100,0,42);
-  armA.updateOffsetAngle(-60);
-  armB.updateOffsetAngle(-160);
+  armA.updateOffsetAngle(-90);
+  armB.updateOffsetAngle(-90);
 }
 
 void draw(){
@@ -125,7 +125,8 @@ void mainDraw() {
     stroke(255,0,0);
     drawPreviewArm(ints[0], armA, targetX, targetY);
     if(mousePressed && !angleSent){
-      angleSent = setNewAngles(motAngA1, motAngB1);
+      setNewAngles(motAngA1, motAngB1);
+      angleSent = true;
     }
   }
   if( validRange(motAngA2) && validRange(motAngB2) ){
