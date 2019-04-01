@@ -19,16 +19,16 @@ int highLimitC = 2500;
 int highLimitD = 2500;
 
 // Current Servo Angles
-int cangleA = 90, cangleB = 90, cangleC = 90, cangleD = 90;
+float cangleA = 90, cangleB = 90, cangleC = 90, cangleD = 90;
 // Serial Input Angles
-int angleA = 90, angleB = 90, angleC = 90, angleD = 90;
+float angleA = 90, angleB = 90, angleC = 90, angleD = 90;
 // Target Servo Angles
-int tangleA = 90, tangleB = 90, tangleC = 90, tangleD = 90;
+float tangleA = 90, tangleB = 90, tangleC = 90, tangleD = 90;
 // Memory Angles
-int mangleA[50];
-int mangleB[50];
-int mangleC[50];
-int mangleD[50];
+float mangleA[50];
+float mangleB[50];
+float mangleC[50];
+float mangleD[50];
 int memoryLength = 50;
 
 // Animation frame
@@ -50,7 +50,7 @@ unsigned long lastDebounceTimeB = 0;  // the last time the output pin was toggle
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 // Modes
-int mode = 0;
+int mode = 2;
 
 // Joystick Analogue Pins
 int joyPinX = 1;
@@ -58,10 +58,10 @@ int joyPinY = 0;
 int potA = 3;
 int potB = 2;
 // speed vars
-int rotSpeed = 1;
+float rotSpeed = 0.1;
 bool inTimerLoop = false;
 unsigned long timerStart = 0;
-unsigned long timerLoopDuration = 30;
+unsigned long timerLoopDuration = 3;
 
 bool inAnimTimerLoop = false;
 unsigned long animTimerStart = 0;
@@ -84,6 +84,7 @@ void setup() {
   servoB.attach( 9, lowLimitB, highLimitB);
   servoC.attach(10, lowLimitC, highLimitC);
   servoD.attach( 6, lowLimitD, highLimitD);
+  directMoveServos();
   //Serial.println("Start");
   // Handle Serial Output
 //  Serial.print("Current Angles");
@@ -107,8 +108,8 @@ void joystick(){
     valA = map(valA, 0, 1023, 0, 180);
     valB = analogRead(potB);
     valB = map(valB, 0, 1023, 0, 180);
-    tangleA = valA;
-    tangleB = valB;
+    tangleA = (float)valA;
+    tangleB = (float)valB;
     if(valX < deadzoneLow || valX > deadzoneHigh){
       if(valX < deadzoneLow){
         tangleC += rotSpeed;
@@ -136,13 +137,13 @@ void serialOutput(){
   frameCount++;
   Serial.print("Current Angles");
   Serial.print(" A:"); // invert A axis
-  Serial.print(180-cangleA);
+  Serial.print(180-(int)cangleA);
   Serial.print(" B:");
-  Serial.print(cangleB);
+  Serial.print((int)cangleB);
   Serial.print(" C:");
-  Serial.print(cangleC);
+  Serial.print((int)cangleC);
   Serial.print(" D:");
-  Serial.print(cangleD);
+  Serial.print((int)cangleD);
   Serial.print(" Mode:");
   Serial.print(mode);
   Serial.print(" animCounter:");
@@ -151,6 +152,13 @@ void serialOutput(){
   Serial.print(animFrame);
   Serial.print(" frameCount:");
   Serial.println(frameCount);
+}
+
+int convertAngleToMicros(float angle){
+  int rangeMicros = highLimitA - lowLimitA;
+  float microsPerDegree = rangeMicros / 180;
+  int returnvalue =  (float)lowLimitA + (angle * microsPerDegree);
+  return returnvalue;
 }
 
 void moveServos(){
@@ -162,44 +170,56 @@ void moveServos(){
     inTimerLoop = false;
     if(cangleA<tangleA){
       cangleA += rotSpeed;
-      servoA.write(cangleA);
+      //servoA.write(cangleA);
+      servoA.writeMicroseconds(convertAngleToMicros(cangleA));
     }
     if(cangleA>tangleA){
       cangleA -= rotSpeed;
-      servoA.write(cangleA);
+      //servoA.write(cangleA);
+      servoA.writeMicroseconds(convertAngleToMicros(cangleA));
     }
     if(cangleB<tangleB){
       cangleB += rotSpeed;
-      servoB.write(cangleB);
+      //servoB.write(cangleB);
+      servoB.writeMicroseconds(convertAngleToMicros(cangleB));
     }
     if(cangleB>tangleB){
       cangleB -= rotSpeed;
-      servoB.write(cangleB);
+      //servoB.write(cangleB);
+      servoB.writeMicroseconds(convertAngleToMicros(cangleB));
     }
     if(cangleC<tangleC){
       cangleC += rotSpeed;
-      servoC.write(cangleC);
+      //servoC.write(cangleC);
+      servoC.writeMicroseconds(convertAngleToMicros(cangleC));
     }
     if(cangleC>tangleC){
       cangleC -= rotSpeed;
-      servoC.write(cangleC);
+      //servoC.write(cangleC);
+      servoC.writeMicroseconds(convertAngleToMicros(cangleC));
     }
     if(cangleD<tangleD){
       cangleD += rotSpeed;
-      servoD.write(cangleD);
+      //servoD.write(cangleD);
+      servoD.writeMicroseconds(convertAngleToMicros(cangleD));
     }
     if(cangleD>tangleD){
       cangleD -= rotSpeed;
-      servoD.write(cangleD);
+      //servoD.write(cangleD);
+      servoD.writeMicroseconds(convertAngleToMicros(cangleD));
     }
   }
 }
 
 void directMoveServos(){
-  servoA.write(tangleA);
-  servoB.write(tangleB);
-  servoC.write(tangleC);
-  servoD.write(tangleD);
+  //servoA.write(tangleA);
+  //servoB.write(tangleB);
+  //servoC.write(tangleC);
+  //servoD.write(tangleD);
+  servoA.writeMicroseconds(convertAngleToMicros(tangleA));
+  servoB.writeMicroseconds(convertAngleToMicros(tangleB));
+  servoC.writeMicroseconds(convertAngleToMicros(tangleC));
+  servoD.writeMicroseconds(convertAngleToMicros(tangleD));
   cangleA = tangleA;
   cangleB = tangleB;
   cangleC = tangleC;
@@ -323,10 +343,10 @@ void parseSerial(){
     }
     if(inputString.startsWith("S")){
       mode = 2;
-      tangleA = 180 - angleSubstring("A");  // Invert A axis
-      tangleB = angleSubstring("B");  
-      tangleC = angleSubstring("C");
-      tangleD = angleSubstring("D");
+      tangleA = (float)(180 - angleSubstring("A"));  // Invert A axis
+      tangleB = (float)angleSubstring("B");  
+      tangleC = (float)angleSubstring("C");
+      tangleD = (float)angleSubstring("D");
       //Serial.println(angleString);
       serialOutput();
     }
