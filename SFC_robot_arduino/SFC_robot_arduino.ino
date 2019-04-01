@@ -80,10 +80,10 @@ void setup() {
   inputString.reserve(200);
   pinMode(buttonPinA, INPUT_PULLUP);
   pinMode(buttonPinB, INPUT_PULLUP);
-  servoA.attach( 9, lowLimitA, highLimitA);
-  servoB.attach(10, lowLimitB, highLimitB);
-  servoC.attach( 6, lowLimitC, highLimitC);
-  servoD.attach(11, lowLimitD, highLimitD);
+  servoA.attach(11, lowLimitA, highLimitA);
+  servoB.attach( 9, lowLimitB, highLimitB);
+  servoC.attach(10, lowLimitC, highLimitC);
+  servoD.attach( 6, lowLimitD, highLimitD);
   //Serial.println("Start");
   // Handle Serial Output
 //  Serial.print("Current Angles");
